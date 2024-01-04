@@ -23,6 +23,11 @@ function fillDataToTable() {
                 <td data-bs-coppy="${user.userAgent}" class="short-view" title="${user.userAgent}">Coppy</td>
                 <td data-bs-coppy="${user.device_id}">${user.device_id}</td>
                 <td data-bs-coppy="${user.stolenAt}">${user.stolenAt}</td>
+                <td>
+                <button class="menu-more btn btn-secondary dropdown-toggle" style="padding: 6px 20px;border-radius: 12px; background: #ffffff11; color: white" data-bs-id="${
+                    user.id
+                }">More
+                </button></td>
                 </tr>`;
                 })
                 .join("");
@@ -33,7 +38,22 @@ function fillDataToTable() {
             tds.forEach((td) => {
                 td.onclick = () => {
                     const text = td.getAttribute("data-bs-coppy");
-                    navigator.clipboard.writeText(text);
+                    if (text && text != "" && text != "unknown") {
+                        navigator.clipboard.writeText(text);
+                        Swal.fire({
+                            title: "Success!",
+                            text: "Coppied to clipboard!",
+                            icon: "success",
+                            confirmButtonText: "Close",
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Error!",
+                            text: "Can not coppy the empty value!",
+                            icon: "error",
+                            confirmButtonText: "Okay",
+                        });
+                    }
                 };
             });
         });
