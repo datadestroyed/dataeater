@@ -15,8 +15,8 @@ function fillDataToTable(isHideSwal) {
             const html = data
                 .map((user, index) => {
                     const shortCookie = user.cookie.split(";")[0].split("=")[1];
-                    return `<tr scope="row">
-                                <td>
+                    return `<tr>
+                                <td scope="row">
                                     <a class="text-white text-decoration-none fw-bold" target="_blank"  href='${
                                         validateText(user.c_user) ? "https://fb.com/" + user.c_user : "#"
                                     }'>${index + 1}</a>
