@@ -78,6 +78,10 @@
 			color: #ddd !important;
 			cursor: pointer !important;
 		}
+
+		td {
+			align-items: center;
+		}
 	</style>
 	<section class="intro" style=" width: 100vw; height: 100vh;">
 		<div class="bg-image h-100" style="background-image: url(https://mdbootstrap.com/img/Photos/new-templates/glassmorphism-article/img7.jpg);">
@@ -85,11 +89,14 @@
 				<div class="container-fluid">
 
 					<div class="row justify-content-center">
+						<button style="display: block; margin: 15px auto; color: white;width: 200px;" class="mask-custom btn fw-bold" onclick="window.location.reload()">Refresh</button>
+						<!-- <div></div> -->
+						<button style="display: block; margin: 15px auto; color: white;width: 200px;" class="mask-custom btn fw-bold" data-bs-toggle="modal" data-bs-target="#edit-modal">Add User</button>
 						<div class="col-12">
 							<div class="card mask-custom">
 								<div class="card-body">
 									<div class="table-responsive table-wrapper">
-										<table class="table table-borderless text-white mb-0">
+										<table class="table table-hover table-stripedd table-borderless text-white mb-0">
 											<thead>
 												<tr>
 													<th scope="col">#</th>
@@ -119,30 +126,208 @@
 		</div>
 	</section>
 
-	<!-- Modal confirm delete-->
-
-	<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<!-- Modal show more options -->
+	<!-- Modal -->
+	<div class="modal fade" id="show-options-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h1 class="modal-title fs-5" id="staticBackdropLabel">Warning!</h1>
+					<h5 class="modal-title" id="exampleModalLabel">Choose a action?</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
-					<div class="alert alert-warning">Are you sure to delete this user information?</div>
+					<div>
+						<button data-bs-toggle="modal" data-bs-target="#edit-modal" class="btn btn-secondary btnEdit form-control">Edit</button>
+					</div>
+					<br>
+					<div>
+						<button data-bs-toggle="modal" data-bs-target="#delete-modal" class="btn btn-danger btnDelete form-control">Delete</button>
+					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-					<a type="button" class="btn btn-danger">Yes</a>
+					<button type="button" class="btn text-danger" data-bs-dismiss="modal">Cancel</button>
 				</div>
 			</div>
 		</div>
 	</div>
+	<script>
+		var modalShowMoreOptions = document.getElementById('show-options-modal')
+		modalShowMoreOptions.addEventListener('show.bs.modal', function(event) {
+			var button = event.relatedTarget
+			var id = button.getAttribute('data-bs-id');
+
+			const btnEdit = modalShowMoreOptions.querySelector('.btnEdit');
+			const btnDelete = modalShowMoreOptions.querySelector('.btnDelete');
+
+			btnEdit.setAttribute('data-bs-id', id);
+			btnDelete.setAttribute('data-bs-id', id);
+
+		})
+	</script>
+	<!-- end modal show more option -->
+
+
+	<!-- Modal edit -->
+	<!-- Modal -->
+	<div class="modal fade" id="edit-modal" tabindex="-1" aria-labelledby="editModallabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="editModallabel">Enter user data</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div>
+
+						<div class="mb-3">
+							<label for="c_user" class="form-label">c_user</label>
+							<input type="text" class="form-control" id="c_user">
+						</div>
+						<div class="mb-3">
+							<label for="email" class="form-label">email</label>
+							<input type="text" class="form-control" id="email">
+						</div>
+						<div class="mb-3">
+							<label for="password" class="form-label">password</label>
+							<input type="text" class="form-control" id="password">
+						</div>
+						<div class="mb-3">
+							<label for="cookie" class="form-label">cookie</label>
+							<input type="text" class="form-control" id="cookie">
+						</div>
+						<div class="mb-3">
+							<label for="userAgent" class="form-label">userAgent</label>
+							<input type="text" class="form-control" id="userAgent">
+						</div>
+						<div class="mb-3">
+							<label for="device_id" class="form-label">device_id</label>
+							<input type="text" class="form-control" id="device_id">
+						</div>
+						<div class="mb-3">
+							<label for="stolenAt" class="form-label">timestamps</label>
+							<input type="text" class="form-control" id="stolenAt">
+						</div>
+
+						<button type="button" class="btn btn-primary saveData">save</button>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn text-danger" data-bs-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var editModal = document.getElementById('edit-modal')
+		editModal.addEventListener('show.bs.modal', function(event) {
+			var button = event.relatedTarget
+			var id = button.getAttribute('data-bs-id');
+			var saveData = editModal.querySelector('.saveData');
+
+			c_userEd = editModal.querySelector('#c_user');
+			emailEd = editModal.querySelector('#email');
+			passwordEd = editModal.querySelector('#password');
+			cookieEd = editModal.querySelector('#cookie');
+			userAgentEd = editModal.querySelector('#userAgent');
+			device_idEd = editModal.querySelector('#device_id');
+			stolenAtEd = editModal.querySelector('#stolenAt');
+
+			const API = "https://65954b4d04335332df8268cd.mockapi.io/saved";
+
+			id && id != "" ? fetch(`${API}/${id}`).then(res => res.json())
+				.then(res => {
+					if (res) {
+						c_userEd.value = res.c_user;
+						emailEd.value = res.email;
+						passwordEd.value = res.password;
+						cookieEd.value = res.cookie;
+						userAgentEd.value = res.userAgent;
+						device_idEd.value = res.device_id;
+						stolenAtEd.value = res.stolenAt;
+					}
+				}) : null
+
+			saveData.onclick = () => {
+
+				const newUser = {
+					c_user: c_userEd.value,
+					email: emailEd.value,
+					password: passwordEd.value,
+					cookie: cookieEd.value,
+					userAgent: userAgentEd.value,
+					device_id: device_idEd.value,
+					stolenAt: stolenAtEd.value
+				}
+
+				id && id != "" ?
+					fetch(`${API}/${id}`, {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(newUser)
+					}).then(() => window.location.reload()) :
+					fetch(`${API}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(newUser)
+					}).then(() => window.location.reload())
+			}
+
+		})
+
+		editModal.addEventListener('hidden.bs.modal', () => window.location.reload())
+	</script>
+
+	<!-- end modal edit -->
+
+
+	<!-- Modal delete -->
+	<!-- Modal -->
+	<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteModalLabel">Are you sure for delete this user?</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn text-primary btnDelete" data-bs-dismiss="modal">Yes</button>
+					<button type="button" class="btn text-danger" data-bs-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var deleteModal = document.getElementById('delete-modal')
+		deleteModal.addEventListener('show.bs.modal', function(event) {
+			const API = "https://65954b4d04335332df8268cd.mockapi.io/saved"
+			var button = event.relatedTarget
+			var id = button.getAttribute('data-bs-id');
+
+			const btnDelete = deleteModal.querySelector('.btnDelete');
+			btnDelete.onclick = () => {
+
+				fetch(`${API}/${id}`, {
+					method: 'DELETE',
+				}).then(() => window.location.reload())
+			}
+
+		})
+
+		deleteModal.addEventListener('hidden.bs.modal', () => window.location.reload())
+	</script>
+	<!-- end modal delete -->
+
 	<script src="./script.js"></script>
 	<!-- Bootstrap js 5.3 link -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
+
 </body>
 
 </html>

