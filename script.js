@@ -41,7 +41,7 @@ function fillDataToTable() {
                 .join("");
             tbody.innerHTML = html;
         })
-        .finally(() => {
+        .then(() => {
             document.querySelectorAll("td[data-bs-coppy]").forEach((td) => {
                 td.onclick = () => {
                     const text = td.getAttribute("data-bs-coppy");
@@ -62,6 +62,14 @@ function fillDataToTable() {
                         });
                     }
                 };
+            });
+        })
+        .finally(() => {
+            Swal.fire({
+                title: "Success!",
+                text: "Data updated!",
+                icon: "success",
+                confirmButtonText: "Close",
             });
         });
 }
