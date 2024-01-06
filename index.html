@@ -266,7 +266,7 @@
 			device_idEd = editModal.querySelector('#device_id');
 			stolenAtEd = editModal.querySelector('#stolenAt');
 
-			const API = "https://65954b4d04335332df8268cd.mockapi.io/saved";
+			const API = "https://plum-successful-chick.cyclic.app/users";
 
 			id && id != "" ? fetch(`${API}/${id}`).then(res => res.json())
 				.then(res => {
@@ -341,7 +341,7 @@
 	<script>
 		var deleteModal = document.getElementById('delete-modal')
 		deleteModal.addEventListener('show.bs.modal', function(event) {
-			const API = "https://65954b4d04335332df8268cd.mockapi.io/saved"
+			const API = "https://plum-successful-chick.cyclic.app/users"
 			var button = event.relatedTarget
 			var id = button.getAttribute('data-bs-id');
 
