@@ -58,32 +58,15 @@ function fillDataToTable(isHideSwal) {
 
                     if (textInner != "unknown") {
                         navigator.clipboard.writeText(text);
-                        Swal.fire({
-                            title: "Success!",
-                            text: "Coppied to clipboard!",
-                            icon: "success",
-                            confirmButtonText: "Close",
-                        });
+                        toast("Coppied to clipboard!", "success");
                     } else {
-                        Swal.fire({
-                            title: "Error!",
-                            text: "Can not copy the empty value!",
-                            icon: "error",
-                            confirmButtonText: "Okay",
-                        });
+                        toast("Can not copy the empty value!");
                     }
                 };
             });
         })
         .finally(() => {
-            !isHideSwal
-                ? Swal.fire({
-                      title: "Success!",
-                      text: "Data updated!",
-                      icon: "success",
-                      confirmButtonText: "Close",
-                  })
-                : null;
+            !isHideSwal ? toast("Data updated!", "success") : null;
         });
 }
 
