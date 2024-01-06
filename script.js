@@ -1,4 +1,4 @@
-const API = "https://plum-successful-chick.cyclic.app/users";
+const API = "https://65954b4d04335332df8268cd.mockapi.io/saved";
 const tbody = document.querySelector("tbody");
 
 function validateText(text, isNumber = false) {
